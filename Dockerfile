@@ -40,7 +40,8 @@ WORKDIR /etc/guacamole/guacamole-server-0.9.14
 RUN ./configure --with-init-dir=/etc/init.d && \
     make &&                                    \
     make install &&                            \
-    ldconfig
+    ldconfig &&                                \
+    rm -r /etc/guacamole/guacamole-server-0.9.14*
 
 # Create Guacamole configurations
 ENV GUACAMOLE_HOME="/etc/guacamole"
@@ -72,15 +73,18 @@ RUN apt-get update &&  \
       vim &&           \
     rm -rf /var/lib/apt/lists/*
 
-
+# Install TigerVNC server
 RUN wget "https://bintray.com/tigervnc/stable/download_file?file_path=ubuntu-16.04LTS%2Famd64%2Ftigervncserver_1.8.0-1ubuntu1_amd64.deb" -O /root/tigervnc.deb && \
     dpkg -i /root/tigervnc.deb && \
     rm /root/tigervnc.deb
 
+# Set VNC password
 RUN /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | vncpasswd
 
+# Remove keyboard shortcut to allow bash_completion in xfce4-terminal
 RUN echo "DISPLAY=:1 xfconf-query -c xfce4-keyboard-shortcuts -p \"/xfwm4/custom/<Super>Tab\" -r" >> /root/.bashrc
 
+# Add help message
 RUN echo \
 "*==================================================================*\n\n\
   To access the Desktop, point your browser to:\n\n\
