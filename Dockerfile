@@ -21,7 +21,7 @@ RUN apt-get update &&            \
 
 # Install remaining dependencies, tools, and XFCE desktop
 RUN apt-get update &&  \
-    apt-get install -y \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
       bash-completion  \
       firefox          \
       gcc              \
