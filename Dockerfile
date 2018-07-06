@@ -66,13 +66,20 @@ RUN echo \
             <param name=\"username\">user</param>\n\
             <param name=\"password\">password</param>\n\
             <param name=\"port\">5901</param>\n\
+            <param name=\"enable-sftp\">true</param>\n\
+            <param name=\"sftp-username\">user</param>\n\
+            <param name=\"sftp-password\">password</param>\n\
+            <param name=\"sftp-directory\">/home/user</param>\n\
+            <param name=\"sftp-root-directory\">/home/user</param>\n\
         </connection>\n\
         <connection name=\"SSH\">\n\
             <protocol>ssh</protocol>\n\
             <param name=\"hostname\">localhost</param>\n\
             <param name=\"username\">user</param>\n\
             <param name=\"password\">password</param>\n\
-            <param name=\"port\">2222</param>\n\
+            <param name=\"port\">22</param>\n\
+            <param name=\"enable-sftp\">true</param>\n\
+            <param name=\"sftp-root-directory\">/home/user</param>\n\
         </connection>\n\
     </authorize>\n\
 </user-mapping>\n" > /etc/guacamole/user-mapping.xml
@@ -95,15 +102,11 @@ RUN echo "user ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 # Set VNC password
 RUN /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su user -c vncpasswd
 
-# Set SSH port
-RUN echo "Port 2222" >> /etc/ssh/sshd_config
-
 # Remove keyboard shortcut to allow bash_completion in xfce4-terminal
 RUN echo "DISPLAY=:1 xfconf-query -c xfce4-keyboard-shortcuts -p \"/xfwm4/custom/<Super>Tab\" -r" >> /home/user/.bashrc
 
 WORKDIR /home/user
 ENV RES="1920x1080"
-EXPOSE 2222
 EXPOSE 8080
 
 ENTRYPOINT service guacd start && \
