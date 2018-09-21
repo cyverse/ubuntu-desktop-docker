@@ -17,3 +17,5 @@ docker run -ti -p 8080:8080 ubuntu-desktop-docker
 ```
 
 When the container finishes starting up, it will present you with a link to access the desktop.
+
+You can set the resolution during startup by using environment variables with: `-e RES=1280x1024`
