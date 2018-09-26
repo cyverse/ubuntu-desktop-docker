@@ -84,16 +84,6 @@ RUN echo \
     </authorize>\n\
 </user-mapping>\n" > /etc/guacamole/user-mapping.xml
 
-# Add help message
-RUN echo \
-"*==================================================================*\n\n\
-  To access the Desktop, point your browser to:\n\n\
-  http://localhost:8080/guacamole?username=user&password=password\n\n\
-  Once connected to the session, your user info is:\n\n\
-      Username: \"user\"\n\
-      Password: \"password\"\n\n\
-*==================================================================*" > /etc/help-msg
-
 # Create user account with password-less sudo abilities
 RUN useradd -s /bin/bash -g 100 -G sudo -m user
 RUN /usr/bin/printf '%s\n%s\n' 'password' 'password'| passwd user
@@ -104,6 +94,20 @@ RUN /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su user -c vncpas
 
 # Remove keyboard shortcut to allow bash_completion in xfce4-terminal
 RUN echo "DISPLAY=:1 xfconf-query -c xfce4-keyboard-shortcuts -p \"/xfwm4/custom/<Super>Tab\" -r" >> /home/user/.bashrc
+
+# Add help message
+RUN echo \
+"*==================================================================*\n\n\
+  For the Guacamole Homepage:\n\
+  http://localhost:8080/guacamole?username=user&password=password\n\n\
+  For direct VNC Desktop:\n\
+  http://localhost:8080/guacamole/#/client/Vk5DAGMAZGVmYXVsdA==?username=user&password=password\n\n\
+  For direct SSH Shell:\n\
+  http://localhost:8080/guacamole/#/client/U1NIAGMAZGVmYXVsdA==?username=user&password=password\n\n\
+  Once connected to the session, your user info is:\n\n\
+      Username: \"user\"\n\
+      Password: \"password\"\n\n\
+*==================================================================*" > /etc/help-msg
 
 WORKDIR /home/user
 ENV RES="1920x1080"
