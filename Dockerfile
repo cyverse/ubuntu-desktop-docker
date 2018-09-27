@@ -1,4 +1,4 @@
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 
 WORKDIR /etc/guacamole
 
@@ -10,11 +10,11 @@ RUN apt-get update &&            \
       libjpeg62-dev              \
       libcairo2-dev              \
       libossp-uuid-dev           \
-      libpng12-dev               \
+      libpng-dev                 \
       libpango1.0-dev            \
       libssh2-1-dev              \
       libssl-dev                 \
-      libtasn1-3-bin             \
+      libtasn1-bin               \
       libvorbis-dev              \
       libwebp-dev &&             \
     rm -rf /var/lib/apt/lists/*
@@ -25,11 +25,12 @@ RUN apt-get update &&  \
       bash-completion  \
       firefox          \
       gcc              \
+      gcc-6            \
       libvncserver-dev \
       make             \
       openssh-server   \
       sudo             \
-      tomcat7          \
+      tomcat8          \
       vim              \
       wget             \
       xfce4            \
@@ -37,19 +38,22 @@ RUN apt-get update &&  \
     rm -rf /var/lib/apt/lists/*
 
 # Install TigerVNC server
-RUN wget "https://bintray.com/tigervnc/stable/download_file?file_path=ubuntu-16.04LTS%2Famd64%2Ftigervncserver_1.8.0-1ubuntu1_amd64.deb" -O /root/tigervnc.deb && \
-    dpkg -i /root/tigervnc.deb && \
-    rm /root/tigervnc.deb
+#RUN wget "https://bintray.com/tigervnc/stable/download_file?file_path=ubuntu-16.04LTS%2Famd64%2Ftigervncserver_1.8.0-1ubuntu1_amd64.deb" -O /root/tigervnc.deb && \
+#    dpkg -i /root/tigervnc.deb && \
+#    rm /root/tigervnc.deb
+RUN wget "https://bintray.com/tigervnc/stable/download_file?file_path=tigervnc-1.9.0.x86_64.tar.gz" -O /root/tigervnc.tar.gz && \
+    tar -C / --strip-components=1 --show-transformed-names -xvzf /root/tigervnc.tar.gz && \
+    rm /root/tigervnc.tar.gz
 
 # Download necessary Guacamole files
-RUN wget "http://apache.org/dyn/closer.cgi?action=download&filename=guacamole/0.9.14/binary/guacamole-0.9.14.war" -O /var/lib/tomcat7/webapps/guacamole.war
+RUN wget "http://apache.org/dyn/closer.cgi?action=download&filename=guacamole/0.9.14/binary/guacamole-0.9.14.war" -O /var/lib/tomcat8/webapps/guacamole.war
 RUN wget "http://apache.org/dyn/closer.cgi?action=download&filename=guacamole/0.9.14/source/guacamole-server-0.9.14.tar.gz" -O /etc/guacamole/guacamole-server-0.9.14.tar.gz
 RUN tar xvf /etc/guacamole/guacamole-server-0.9.14.tar.gz
 
 # Install guacd
 WORKDIR /etc/guacamole/guacamole-server-0.9.14
 RUN ./configure --with-init-dir=/etc/init.d && \
-    make &&                                    \
+    make CC=gcc-6 &&                                    \
     make install &&                            \
     ldconfig &&                                \
     rm -r /etc/guacamole/guacamole-server-0.9.14*
@@ -115,7 +119,7 @@ EXPOSE 8080
 
 ENTRYPOINT service guacd start && \
            service ssh start &&   \
-           service tomcat7 start; \
+           service tomcat8 start; \
            su user -c "USER=user vncserver -depth 24 -geometry $RES -name \"VNC\" :1" && \
            cat /etc/help-msg && \
            tail -f /dev/null
