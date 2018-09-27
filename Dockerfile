@@ -16,8 +16,18 @@ RUN apt-get update &&            \
       libssl-dev                 \
       libtasn1-bin               \
       libvorbis-dev              \
-      libwebp-dev &&             \
+      libwebp-dev                \
+      locales &&                 \
     rm -rf /var/lib/apt/lists/*
+
+# Before installing desktop, set the locale to UTF-8
+# see https://stackoverflow.com/questions/28405902/how-to-set-the-locale-inside-a-ubuntu-docker-container
+#RUN touch /usr/share/locale/locale.alias && \
+RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
+    locale-gen
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
 
 # Install remaining dependencies, tools, and XFCE desktop
 RUN apt-get update &&  \
