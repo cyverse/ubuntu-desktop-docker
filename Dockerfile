@@ -57,32 +57,7 @@ RUN ./configure --with-init-dir=/etc/init.d && \
 # Create Guacamole configurations
 ENV GUACAMOLE_HOME="/etc/guacamole"
 RUN echo "user-mapping: /etc/guacamole/user-mapping.xml" > /etc/guacamole/guacamole.properties
-RUN echo \
-"<user-mapping>\n\
-    <authorize username=\"user\" password=\"password\">\n\
-        <connection name=\"VNC\">\n\
-            <protocol>vnc</protocol>\n\
-            <param name=\"hostname\">localhost</param>\n\
-            <param name=\"username\">user</param>\n\
-            <param name=\"password\">password</param>\n\
-            <param name=\"port\">5901</param>\n\
-            <param name=\"enable-sftp\">true</param>\n\
-            <param name=\"sftp-username\">user</param>\n\
-            <param name=\"sftp-password\">password</param>\n\
-            <param name=\"sftp-directory\">/home/user</param>\n\
-            <param name=\"sftp-root-directory\">/home/user</param>\n\
-        </connection>\n\
-        <connection name=\"SSH\">\n\
-            <protocol>ssh</protocol>\n\
-            <param name=\"hostname\">localhost</param>\n\
-            <param name=\"username\">user</param>\n\
-            <param name=\"password\">password</param>\n\
-            <param name=\"port\">22</param>\n\
-            <param name=\"enable-sftp\">true</param>\n\
-            <param name=\"sftp-root-directory\">/home/user</param>\n\
-        </connection>\n\
-    </authorize>\n\
-</user-mapping>\n" > /etc/guacamole/user-mapping.xml
+RUN touch /etc/guacamole/user-mapping.xml
 
 # Create user account with password-less sudo abilities
 RUN useradd -s /bin/bash -g 100 -G sudo -m user
@@ -96,26 +71,13 @@ RUN /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su user -c vncpas
 RUN echo "DISPLAY=:1 xfconf-query -c xfce4-keyboard-shortcuts -p \"/xfwm4/custom/<Super>Tab\" -r" >> /home/user/.bashrc
 
 # Add help message
-RUN echo \
-"*==================================================================*\n\n\
-  For the Guacamole Homepage:\n\
-  http://localhost:8080/guacamole?username=user&password=password\n\n\
-  For direct VNC Desktop:\n\
-  http://localhost:8080/guacamole/#/client/Vk5DAGMAZGVmYXVsdA==?username=user&password=password\n\n\
-  For direct SSH Shell:\n\
-  http://localhost:8080/guacamole/#/client/U1NIAGMAZGVmYXVsdA==?username=user&password=password\n\n\
-  Once connected to the session, your user info is:\n\n\
-      Username: \"user\"\n\
-      Password: \"password\"\n\n\
-*==================================================================*" > /etc/help-msg
+RUN touch /etc/help-msg
 
 WORKDIR /home/user
 ENV RES="1920x1080"
 EXPOSE 8080
 
-ENTRYPOINT service guacd start && \
-           service ssh start &&   \
-           service tomcat7 start; \
-           su user -c "USER=user vncserver -depth 24 -geometry $RES -name \"VNC\" :1" && \
-           cat /etc/help-msg && \
-           tail -f /dev/null
+COPY startup.sh /startup.sh
+RUN chmod +x /startup.sh
+
+ENTRYPOINT ["/startup.sh"]
