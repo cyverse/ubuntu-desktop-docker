@@ -87,11 +87,13 @@ RUN echo "DISPLAY=:1 xfconf-query -c xfce4-keyboard-shortcuts -p \"/xfwm4/custom
 # Add help message
 RUN touch /etc/help-msg
 
-WORKDIR /home/user
-ENV RES="1920x1080"
+WORKDIR /home/user/Desktop
+ENV RES "1920x1080"
 EXPOSE 8080
 
 COPY startup.sh /startup.sh
 RUN chmod +x /startup.sh
 
-ENTRYPOINT ["/startup.sh"]
+USER 1000:100
+
+ENTRYPOINT sudo -E /startup.sh
