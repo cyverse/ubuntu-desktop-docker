@@ -96,4 +96,10 @@ RUN chmod +x /startup.sh
 
 USER 1000:100
 
+# copy and untar the default xfce4 config so that we don't get an annoying startup dialog
+COPY xfce4-default-config.tgz /home/user/xfce4-default-config.tgz
+RUN mkdir -p /home/user/.config/xfce4/ && \
+    tar -C /home/user/.config/xfce4/ --strip-components=1 -xvzf /home/user/xfce4-default-config.tgz && \
+    rm -f /home/user/xfce4-default-config.tgz
+
 ENTRYPOINT sudo -E /startup.sh
