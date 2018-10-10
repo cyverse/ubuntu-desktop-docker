@@ -72,13 +72,13 @@ default () {
   echo \
 "*==================================================================*
   For the Guacamole Homepage:
-  http://localhost:8080/guacamole?username=user&password=password
+  http://localhost:8080/?username=user&password=password
 
   For direct VNC Desktop:
-  http://localhost:8080/guacamole/#/client/Vk5DAGMAZGVmYXVsdA==?username=user&password=password
+  http://localhost:8080/#/client/Vk5DAGMAZGVmYXVsdA==?username=user&password=password
 
   For direct SSH Shell:
-  http://localhost:8080/guacamole/#/client/U1NIAGMAZGVmYXVsdA==?username=user&password=password
+  http://localhost:8080/#/client/U1NIAGMAZGVmYXVsdA==?username=user&password=password
 
   Once connected to the session, your user info is:
       Username: \"user\"

@@ -56,7 +56,8 @@ RUN wget "https://bintray.com/tigervnc/stable/download_file?file_path=tigervnc-1
     rm /root/tigervnc.tar.gz
 
 # Download necessary Guacamole files
-RUN wget "http://apache.org/dyn/closer.cgi?action=download&filename=guacamole/0.9.14/binary/guacamole-0.9.14.war" -O /var/lib/tomcat8/webapps/guacamole.war
+RUN rm -rf /var/lib/tomcat8/webapps/ROOT
+RUN wget "http://apache.org/dyn/closer.cgi?action=download&filename=guacamole/0.9.14/binary/guacamole-0.9.14.war" -O /var/lib/tomcat8/webapps/ROOT.war
 RUN wget "http://apache.org/dyn/closer.cgi?action=download&filename=guacamole/0.9.14/source/guacamole-server-0.9.14.tar.gz" -O /etc/guacamole/guacamole-server-0.9.14.tar.gz
 RUN tar xvf /etc/guacamole/guacamole-server-0.9.14.tar.gz
 
