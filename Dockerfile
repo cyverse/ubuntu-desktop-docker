@@ -6,8 +6,8 @@ WORKDIR /etc/guacamole
 RUN apt-get update &&            \
     apt-get install -y           \
       software-properties-common \
-      libjpeg62                  \
-      libjpeg62-dev              \
+      libjpeg-turbo8             \
+      libjpeg-turbo8-dev         \
       libcairo2-dev              \
       libossp-uuid-dev           \
       libpng-dev                 \
@@ -36,7 +36,6 @@ RUN apt-get update &&  \
       firefox          \
       gcc              \
       gcc-6            \
-      libvncserver-dev \
       make             \
       openssh-server   \
       sudo             \
@@ -47,10 +46,14 @@ RUN apt-get update &&  \
       xfce4-goodies && \
     rm -rf /var/lib/apt/lists/*
 
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y gtk2.0 && rm -rf /var/lib/apt/lists/*
+RUN wget "https://github.com/LibVNC/libvncserver/archive/LibVNCServer-0.9.9.tar.gz" && \
+    tar xvf LibVNCServer-0.9.9.tar.gz &&    \
+    cd libvncserver-LibVNCServer-0.9.9 &&   \
+    ./autogen.sh && make && make install && \
+    cd .. && rm -r libvncserver-LibVNCServer-0.9.9 LibVNCServer-0.9.9.tar.gz
+
 # Install TigerVNC server
-#RUN wget "https://bintray.com/tigervnc/stable/download_file?file_path=ubuntu-16.04LTS%2Famd64%2Ftigervncserver_1.8.0-1ubuntu1_amd64.deb" -O /root/tigervnc.deb && \
-#    dpkg -i /root/tigervnc.deb && \
-#    rm /root/tigervnc.deb
 RUN wget "https://bintray.com/tigervnc/stable/download_file?file_path=tigervnc-1.9.0.x86_64.tar.gz" -O /root/tigervnc.tar.gz && \
     tar -C / --strip-components=1 --show-transformed-names -xvzf /root/tigervnc.tar.gz && \
     rm /root/tigervnc.tar.gz
@@ -64,7 +67,7 @@ RUN tar xvf /etc/guacamole/guacamole-server-0.9.14.tar.gz
 # Install guacd
 WORKDIR /etc/guacamole/guacamole-server-0.9.14
 RUN ./configure --with-init-dir=/etc/init.d && \
-    make CC=gcc-6 &&                                    \
+    make CC=gcc-6 &&                           \
     make install &&                            \
     ldconfig &&                                \
     rm -r /etc/guacamole/guacamole-server-0.9.14*
