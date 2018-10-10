@@ -18,12 +18,12 @@
     under the License.
 -->
 <configs>
-    <config name="myvnc" protocol="vnc">
-        <param name="hostname" value="localhost" />
+    <config name="vnc" protocol="vnc">
+        <param name="hostname" value="127.0.0.1" />
         <param name="port" value="5901" />
     </config>
-    <config name="myssh" protocol="ssh">
-        <param name="hostname" value="localhost" />
+    <config name="ssh" protocol="ssh">
+        <param name="hostname" value="127.0.0.1" />
         <param name="port" value="22" />
     </config>
 </configs>
