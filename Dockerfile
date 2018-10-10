@@ -33,7 +33,7 @@ ENV LC_ALL en_US.UTF-8
 RUN apt-get update &&  \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
       bash-completion  \
-      firefox          \
+      chromium-browser \
       gcc              \
       gcc-6            \
       make             \
@@ -87,6 +87,9 @@ RUN /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su user -c vncpas
 
 # Remove keyboard shortcut to allow bash_completion in xfce4-terminal
 RUN echo "DISPLAY=:1 xfconf-query -c xfce4-keyboard-shortcuts -p \"/xfwm4/custom/<Super>Tab\" -r" >> /home/user/.bashrc
+
+# Fix chromium-browser to run with no sandbox
+RUN sed -i -e 's/Exec=chromium-browser/Exec=chromium-browser --no-sandbox/g' /usr/share/applications/chromium-browser.desktop
 
 # Add help message
 RUN touch /etc/help-msg
