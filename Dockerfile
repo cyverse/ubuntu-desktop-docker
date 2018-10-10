@@ -55,24 +55,34 @@ RUN wget "https://bintray.com/tigervnc/stable/download_file?file_path=tigervnc-1
     tar -C / --strip-components=1 --show-transformed-names -xvzf /root/tigervnc.tar.gz && \
     rm /root/tigervnc.tar.gz
 
+# ENV for GUACAMOLE HOME
+ENV GUACAMOLE_HOME="/etc/guacamole"
+
 # Download necessary Guacamole files
 RUN rm -rf /var/lib/tomcat8/webapps/ROOT
 RUN wget "http://apache.org/dyn/closer.cgi?action=download&filename=guacamole/0.9.14/binary/guacamole-0.9.14.war" -O /var/lib/tomcat8/webapps/ROOT.war
-RUN wget "http://apache.org/dyn/closer.cgi?action=download&filename=guacamole/0.9.14/source/guacamole-server-0.9.14.tar.gz" -O /etc/guacamole/guacamole-server-0.9.14.tar.gz
-RUN tar xvf /etc/guacamole/guacamole-server-0.9.14.tar.gz
+RUN wget "http://apache.org/dyn/closer.cgi?action=download&filename=guacamole/0.9.14/source/guacamole-server-0.9.14.tar.gz" -O ${GUACAMOLE_HOME}/guacamole-server-0.9.14.tar.gz
+RUN tar xvf ${GUACAMOLE_HOME}/guacamole-server-0.9.14.tar.gz
+
+# Download the no-auth extension
+RUN wget "http://apache.org/dyn/closer.cgi?action=download&filename=guacamole/0.9.14/binary/guacamole-auth-noauth-0.9.14.tar.gz" -O /root/guacamole-auth-noauth-0.9.14.tar.gz && \
+    tar -C /root -xvzf /root/guacamole-auth-noauth-0.9.14.tar.gz && \
+    mkdir ${GUACAMOLE_HOME}/extensions && \
+    cp /root/guacamole-auth-noauth-0.9.14/guacamole-auth-noauth-0.9.14.jar ${GUACAMOLE_HOME}/extensions && \
+    rm -rf /root/guacamole-auth-noauth-0.9.14.tar.gz /root/guacamole-auth-noauth-0.9.14
 
 # Install guacd
-WORKDIR /etc/guacamole/guacamole-server-0.9.14
+WORKDIR ${GUACAMOLE_HOME}/guacamole-server-0.9.14
 RUN ./configure --with-init-dir=/etc/init.d && \
     make CC=gcc-6 &&                                    \
     make install &&                            \
     ldconfig &&                                \
-    rm -r /etc/guacamole/guacamole-server-0.9.14*
+    rm -r ${GUACAMOLE_HOME}/guacamole-server-0.9.14*
 
 # Create Guacamole configurations
-ENV GUACAMOLE_HOME="/etc/guacamole"
-RUN echo "user-mapping: /etc/guacamole/user-mapping.xml" > /etc/guacamole/guacamole.properties
-RUN touch /etc/guacamole/user-mapping.xml
+COPY guacamole.properties ${GUACAMOLE_HOME}/guacamole.properties
+COPY noauth-config.xml ${GUACAMOLE_HOME}/noauth-config.xml
+RUN touch ${GUACAMOLE_HOME}/user-mapping.xml
 
 # Create user account with password-less sudo abilities
 RUN useradd -s /bin/bash -g 100 -G sudo -m user
