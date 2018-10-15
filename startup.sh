@@ -97,9 +97,8 @@ else
   default
 fi
 
-service guacd start && \
 service ssh start &&   \
 service tomcat8 start; \
 su user -c "USER=user vncserver -depth 24 -geometry $RES -name \"VNC\" :1" && \
 cat /etc/help-msg && \
-tail -f /dev/null
+guacd -L debug -f
