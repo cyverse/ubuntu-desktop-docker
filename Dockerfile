@@ -109,4 +109,7 @@ RUN mkdir -p /home/user/.config/xfce4/ && \
     tar -C /home/user/.config/xfce4/ --strip-components=1 -xvzf /home/user/xfce4-default-config.tgz && \
     rm -f /home/user/xfce4-default-config.tgz
 
+# Fix web browser panel launcher
+RUN sed -i -e 's/Exec=exo-open --launch WebBrowser %u/Exec=chromium-browser --no-sandbox/g' /home/user/.config/xfce4/panel/launcher-11/15389508853.desktop
+
 ENTRYPOINT sudo -E /startup.sh
