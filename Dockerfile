@@ -74,7 +74,9 @@ RUN ./configure --with-init-dir=/etc/init.d && \
 
 # Create Guacamole configurations
 ENV GUACAMOLE_HOME="/etc/guacamole"
-RUN echo "user-mapping: /etc/guacamole/user-mapping.xml" > /etc/guacamole/guacamole.properties
+RUN echo "user-mapping: /etc/guacamole/user-mapping.xml" > /etc/guacamole/guacamole.properties && \
+    echo "enable-audio: true" >> /etc/guacamole/guacamole.properties && \
+    echo "audio-servername: 127.0.0.1" >> /etc/guacamole/guacamole.properties
 RUN touch /etc/guacamole/user-mapping.xml
 
 # Create user account with password-less sudo abilities
@@ -90,6 +92,9 @@ RUN echo "DISPLAY=:1 xfconf-query -c xfce4-keyboard-shortcuts -p \"/xfwm4/custom
 
 # Fix chromium-browser to run with no sandbox
 RUN sed -i -e 's/Exec=chromium-browser/Exec=chromium-browser --no-sandbox/g' /usr/share/applications/chromium-browser.desktop
+
+# enable pulse audio
+RUN echo "load-module module-native-protocol-tcp auth-ip-acl=127.0.0.1 auth-anonymous=1" >> /etc/pulse/default.pa
 
 # Add help message
 RUN touch /etc/help-msg
