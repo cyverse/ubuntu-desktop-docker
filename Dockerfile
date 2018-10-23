@@ -17,7 +17,8 @@ RUN apt-get update &&            \
       libtasn1-bin               \
       libvorbis-dev              \
       libwebp-dev                \
-      locales &&                 \
+      locales                    \
+      libpulse-dev &&            \
     rm -rf /var/lib/apt/lists/*
 
 # Before installing desktop, set the locale to UTF-8
@@ -74,9 +75,7 @@ RUN ./configure --with-init-dir=/etc/init.d && \
 
 # Create Guacamole configurations
 ENV GUACAMOLE_HOME="/etc/guacamole"
-RUN echo "user-mapping: /etc/guacamole/user-mapping.xml" > /etc/guacamole/guacamole.properties && \
-    echo "enable-audio: true" >> /etc/guacamole/guacamole.properties && \
-    echo "audio-servername: 127.0.0.1" >> /etc/guacamole/guacamole.properties
+RUN echo "user-mapping: /etc/guacamole/user-mapping.xml" > /etc/guacamole/guacamole.properties
 RUN touch /etc/guacamole/user-mapping.xml
 
 # Create user account with password-less sudo abilities

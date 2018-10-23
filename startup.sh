@@ -26,6 +26,8 @@ vnc-only () {
             <param name=\"sftp-password\">password</param>
             <param name=\"sftp-directory\">/home/user</param>
             <param name=\"sftp-root-directory\">/home/user</param>
+            <param name=\"enable-audio\">true</param>
+            <param name=\"audio-servername\">127.0.0.1</param>
         </connection>
     </authorize>
 </user-mapping>" > /etc/guacamole/user-mapping.xml
@@ -56,6 +58,8 @@ default () {
             <param name=\"sftp-password\">password</param>
             <param name=\"sftp-directory\">/home/user</param>
             <param name=\"sftp-root-directory\">/home/user</param>
+            <param name=\"enable-audio\">true</param>
+            <param name=\"audio-servername\">127.0.0.1</param>
         </connection>
         <connection name=\"SSH\">
             <protocol>ssh</protocol>
