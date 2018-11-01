@@ -83,7 +83,8 @@ RUN /usr/bin/printf '%s\n%s\n' 'password' 'password'| passwd user
 RUN echo "user ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 # Set VNC password
-RUN /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su user -c vncpasswd
+#RUN /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su user -c vncpasswd
+RUN  echo -n 'password\npassword\nn\n' | su user -c vncpasswd
 
 # Remove keyboard shortcut to allow bash_completion in xfce4-terminal
 RUN echo "DISPLAY=:1 xfconf-query -c xfce4-keyboard-shortcuts -p \"/xfwm4/custom/<Super>Tab\" -r" >> /home/user/.bashrc
