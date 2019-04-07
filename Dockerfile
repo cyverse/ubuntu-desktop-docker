@@ -36,6 +36,7 @@ RUN apt-get update &&            \
       libtasn1-bin               \
       libvorbis-dev              \
       libwebp-dev                \
+      libpulse-dev               \
 
       # Install remaining dependencies, tools, and XFCE desktop
       bash-completion  \
@@ -50,7 +51,6 @@ RUN apt-get update &&            \
       wget             \
       xfce4            \
       xfce4-goodies    \
-
       xauth            \
 
       # install libvncserver depencies
@@ -60,6 +60,10 @@ RUN apt-get update &&            \
     apt-get clean &&             \
     rm -rf /var/lib/apt/lists/*
 
+# install turbovnc
+RUN wget "https://sourceforge.net/projects/turbovnc/files/${TURBOVNC_VERSION}/turbovnc_${TURBOVNC_VERSION}_amd64.deb/download" -O /opt/turbovnc.deb && \
+    dpkg -i /opt/turbovnc.deb && \
+    rm -f /opt/turbovnc.deb
 
 # Download necessary Guacamole files
 RUN rm -rf /var/lib/tomcat8/webapps/ROOT && \
@@ -93,6 +97,9 @@ RUN echo "DISPLAY=:1 xfconf-query -c xfce4-keyboard-shortcuts -p \"/xfwm4/custom
 
 # Fix chromium-browser to run with no sandbox
 RUN sed -i -e 's/Exec=chromium-browser/Exec=chromium-browser --no-sandbox/g' /usr/share/applications/chromium-browser.desktop
+
+# enable pulse audio
+RUN echo "load-module module-native-protocol-tcp auth-ip-acl=127.0.0.1 auth-anonymous=1" >> /etc/pulse/default.pa
 
 # Add help message
 RUN touch /etc/help-msg
