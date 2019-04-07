@@ -1,10 +1,29 @@
 FROM ubuntu:18.04
 
+ARG    TURBOVNC_VERSION="2.2.1"
+ENV    GUACAMOLE_HOME="/etc/guacamole"
+ENV    RES "1920x1080"
+EXPOSE 8080
+
 WORKDIR /etc/guacamole
+
+# Install locale and set
+RUN apt-get update &&            \
+    apt-get install -y           \
+      locales &&                 \
+    apt-get clean &&             \
+    rm -rf /var/lib/apt/lists/*
+# Before installing desktop, set the locale to UTF-8
+# see https://stackoverflow.com/questions/28405902/how-to-set-the-locale-inside-a-ubuntu-docker-container
+RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
+    locale-gen
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
 
 # Install libraries/dependencies
 RUN apt-get update &&            \
-    apt-get install -y           \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
       software-properties-common \
       libjpeg-turbo8             \
       libjpeg-turbo8-dev         \
@@ -17,21 +36,8 @@ RUN apt-get update &&            \
       libtasn1-bin               \
       libvorbis-dev              \
       libwebp-dev                \
-      locales &&                 \
-    rm -rf /var/lib/apt/lists/*
 
-# Before installing desktop, set the locale to UTF-8
-# see https://stackoverflow.com/questions/28405902/how-to-set-the-locale-inside-a-ubuntu-docker-container
-#RUN touch /usr/share/locale/locale.alias && \
-RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
-    locale-gen
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US:en
-ENV LC_ALL en_US.UTF-8
-
-# Install remaining dependencies, tools, and XFCE desktop
-RUN apt-get update &&  \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y \
+      # Install remaining dependencies, tools, and XFCE desktop
       bash-completion  \
       chromium-browser \
       gcc              \
@@ -43,48 +49,44 @@ RUN apt-get update &&  \
       vim              \
       wget             \
       xfce4            \
-      xfce4-goodies && \
+      xfce4-goodies    \
+
+      xauth            \
+
+      # install libvncserver depencies
+      libvncserver-dev \
+      gtk2.0       &&  \
+
+    apt-get clean &&             \
     rm -rf /var/lib/apt/lists/*
 
-RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y gtk2.0 && rm -rf /var/lib/apt/lists/*
-RUN wget "https://github.com/LibVNC/libvncserver/archive/LibVNCServer-0.9.9.tar.gz" && \
-    tar xvf LibVNCServer-0.9.9.tar.gz &&    \
-    cd libvncserver-LibVNCServer-0.9.9 &&   \
-    ./autogen.sh && make && make install && \
-    cd .. && rm -r libvncserver-LibVNCServer-0.9.9 LibVNCServer-0.9.9.tar.gz
-
-# Install TigerVNC server
-RUN wget "https://bintray.com/tigervnc/stable/download_file?file_path=tigervnc-1.9.0.x86_64.tar.gz" -O /root/tigervnc.tar.gz && \
-    tar -C / --strip-components=1 --show-transformed-names -xvzf /root/tigervnc.tar.gz && \
-    rm /root/tigervnc.tar.gz
 
 # Download necessary Guacamole files
-RUN rm -rf /var/lib/tomcat8/webapps/ROOT
-RUN wget "http://apache.org/dyn/closer.cgi?action=download&filename=guacamole/0.9.14/binary/guacamole-0.9.14.war" -O /var/lib/tomcat8/webapps/ROOT.war
-RUN wget "http://apache.org/dyn/closer.cgi?action=download&filename=guacamole/0.9.14/source/guacamole-server-0.9.14.tar.gz" -O /etc/guacamole/guacamole-server-0.9.14.tar.gz
-RUN tar xvf /etc/guacamole/guacamole-server-0.9.14.tar.gz
-
-# Install guacd
-WORKDIR /etc/guacamole/guacamole-server-0.9.14
-RUN ./configure --with-init-dir=/etc/init.d && \
-    make CC=gcc-6 &&                           \
-    make install &&                            \
-    ldconfig &&                                \
-    rm -r /etc/guacamole/guacamole-server-0.9.14*
+RUN rm -rf /var/lib/tomcat8/webapps/ROOT && \
+    wget "http://apache.org/dyn/closer.cgi?action=download&filename=guacamole/1.0.0/binary/guacamole-1.0.0.war" -O /var/lib/tomcat8/webapps/ROOT.war && \
+    wget "http://apache.org/dyn/closer.cgi?action=download&filename=guacamole/1.0.0/source/guacamole-server-1.0.0.tar.gz" -O /etc/guacamole/guacamole-server-1.0.0.tar.gz && \
+    tar xvf /etc/guacamole/guacamole-server-1.0.0.tar.gz && \
+    cd /etc/guacamole/guacamole-server-1.0.0 && \
+   ./configure --with-init-dir=/etc/init.d &&   \
+    make CC=gcc-6 &&                            \
+    make install &&                             \
+    ldconfig &&                                 \
+    rm -r /etc/guacamole/guacamole-server-1.0.0*
 
 # Create Guacamole configurations
-ENV GUACAMOLE_HOME="/etc/guacamole"
-RUN echo "user-mapping: /etc/guacamole/user-mapping.xml" > /etc/guacamole/guacamole.properties
-RUN touch /etc/guacamole/user-mapping.xml
+RUN echo "user-mapping: /etc/guacamole/user-mapping.xml" > /etc/guacamole/guacamole.properties && \
+    touch /etc/guacamole/user-mapping.xml
 
 # Create user account with password-less sudo abilities
-RUN useradd -s /bin/bash -g 100 -G sudo -m user
-RUN /usr/bin/printf '%s\n%s\n' 'password' 'password'| passwd user
-RUN echo "user ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+RUN useradd -s /bin/bash -g 100 -G sudo -m user && \
+    /usr/bin/printf '%s\n%s\n' 'password' 'password'| passwd user && \
+    echo "user ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 # Set VNC password
-#RUN /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su user -c vncpasswd
-RUN  echo -n 'password\npassword\nn\n' | su user -c vncpasswd
+#RUN mkdir /home/user/.vnc && \
+#    chown user /home/user/.vnc && \
+#    /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su user -c /opt/TurboVNC/bin/vncpasswd
+#RUN  echo -n 'password\npassword\nn\n' | su user -c vncpasswd
 
 # Remove keyboard shortcut to allow bash_completion in xfce4-terminal
 RUN echo "DISPLAY=:1 xfconf-query -c xfce4-keyboard-shortcuts -p \"/xfwm4/custom/<Super>Tab\" -r" >> /home/user/.bashrc
@@ -96,8 +98,6 @@ RUN sed -i -e 's/Exec=chromium-browser/Exec=chromium-browser --no-sandbox/g' /us
 RUN touch /etc/help-msg
 
 WORKDIR /home/user/Desktop
-ENV RES "1920x1080"
-EXPOSE 8080
 
 COPY startup.sh /startup.sh
 RUN chmod +x /startup.sh

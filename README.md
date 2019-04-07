@@ -1,6 +1,6 @@
 # ubuntu-desktop-docker
 
-This is a container that has a full Guacamole installation and Ubuntu XFCE desktop. This allows someone to have a simple all-in-one desktop through their web browser.
+This is a container that has a full Guacamole installation, TurboVNC and Ubuntu XFCE desktop. This allows someone to have a simple all-in-one desktop through their web browser.
 
 First, get the image by cloning this repository and building it:
 ```

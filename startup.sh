@@ -99,6 +99,7 @@ fi
 
 service ssh start &&   \
 service tomcat8 start; \
-su user -c "USER=user vncserver -depth 24 -geometry $RES -name \"VNC\" :1" && \
+#su user -c "USER=user vncserver -depth 24 -geometry $RES -name \"VNC\" :1" && \
+su user -c "USER=user /opt/TurboVNC/bin/vncserver -localhost -verbose -nohttpd -depth 24 -geometry $RES -securitytypes NONE -name \"VNC\" :1" && \
 cat /etc/help-msg && \
 guacd -L debug -f
