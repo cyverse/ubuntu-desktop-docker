@@ -50,7 +50,7 @@ RUN apt-get update &&            \
       vim              \
       wget             \
       xfce4            \
-      xfce4-goodies    \
+#      xfce4-goodies    \
       xauth            \
 
       # install libvncserver depencies
